@@ -1,10 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const app = express();
-app.use(express.json());
-app.use(express.static("public"));
 
+// Parse JSON bodies
+app.use(express.json());
+
+// Serve static files from 'public' folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// MongoDB URL from environment
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/my-db";
 
 if (!mongoUrl) {
@@ -18,7 +24,7 @@ mongoose
   .then(() => {
     console.log("Connected to MongoDB");
 
-    // Start server only after DB connects
+    // Start server after DB connects
     app.listen(3000, () => {
       console.log("App running on port 3000");
     });
@@ -28,7 +34,7 @@ mongoose
     process.exit(1);
   });
 
-// Schema & Model
+// MongoDB Schema & Model
 const UserSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -36,9 +42,9 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
-// Root route
+// Root route — serve index.html explicitly
 app.get("/", (req, res) => {
-  res.send("API is running 🚀");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // GET profile
